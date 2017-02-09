@@ -7,7 +7,7 @@ My ideal shell development environment. Originally taken from a pair programming
 
 ### Modified to include
 * custom VIM with plugins (racer, syntax-highlighting, and more)
-* RVM (adjusted fo FishShell)
+* RVM (adjusted for FishShell)
 * RVM: Ruby 2.4.0 installed with some basic gems included (rake, bundler, rails, github-auth)
 * Rust version 1.15.1
 * Fish Shell with custom Github centered prompt

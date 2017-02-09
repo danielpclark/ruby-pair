@@ -1,5 +1,7 @@
 FROM ubuntu:16.10
-MAINTAINER Daniel P. Clark <6ftdan@gmail.com>
+LABEL Maintainer="Daniel P. Clark <6ftdan@gmail.com>" \
+      Version="1.0" \
+      Description="Remote pair programming environment with Ruby, Rust, VIM, RVM, neovim, tmux, SSH, and FishShell."
 
 ENV USER root
 ENV RUST_VERSION=1.15.1
