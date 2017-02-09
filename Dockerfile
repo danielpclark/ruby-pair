@@ -42,7 +42,6 @@ RUN git clone https://github.com/vim/vim.git &&\
     update-alternatives --install /usr/bin/vi vi /usr/bin/vim 1 &&\
     update-alternatives --set vi /usr/bin/vim &&\
 
-
 # Install Rust
     curl -sO https://static.rust-lang.org/dist/rust-$RUST_VERSION-x86_64-unknown-linux-gnu.tar.gz &&\
     tar -xzf rust-$RUST_VERSION-x86_64-unknown-linux-gnu.tar.gz &&\
