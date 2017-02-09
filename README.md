@@ -4,6 +4,7 @@ My ideal shell development environment. Originally taken from a pair programming
 * SSH support (github user account used for SSH login permission)
 * tmux
 * neovim
+
 ### Modified to include
 * custom VIM with plugins (racer, syntax-highlighting, and more)
 * RVM (adjusted fo FishShell)
