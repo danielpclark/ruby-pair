@@ -2,7 +2,7 @@ FROM ubuntu:16.10
 MAINTAINER Daniel P. Clark <6ftdan@gmail.com>
 
 ENV USER root
-ENV RUST_VERSION=1.15.0
+ENV RUST_VERSION=1.15.1
 
 # Start by changing the apt output, as stolen from Discourse's Dockerfiles.
 RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
