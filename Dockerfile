@@ -142,6 +142,8 @@ RUN \
 # SSH script
     curl -sL -o /home/dev/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/ssh_key_adder.rb &&\
     chmod +x /home/dev/ssh_key_adder.rb &&\
+    wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip &&\
+    unzip ngrok-stable-linux-amd64.zip &&\
 
 # Clean up
     sudo apt-get clean -y &&\
@@ -156,8 +158,8 @@ RUN \
     RUN /bin/bash -c "source ~/.rvm/scripts/rvm;rvm use 2.4.0;gem install rake bundler rails github-auth git-duet seeing_is_believing --no-rdoc --no-ri"
 
 # Expose SSH
-EXPOSE 22
+#EXPOSE 22
 
 # Install the SSH keys of ENV-configured GitHub users before running the SSH
 # server process. See README for SSH instructions.
-CMD /home/dev/ssh_key_adder.rb && sudo /usr/sbin/sshd -D
+CMD bash -c "AUTHORIZED_GH_USERS=$GH_USERS /home/dev/ssh_key_adder.rb;sudo /usr/sbin/sshd;/home/dev/ngrok authtoken $NGROK;ngrok tcp 22 &"
