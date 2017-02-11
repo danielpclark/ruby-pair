@@ -140,6 +140,7 @@ RUN \
 
 # SSH script
     curl -sL -o /home/dev/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/ssh_key_adder.rb &&\
+    chmod +x /home/dev/ssh_key_adder.rb
 
 # Clean up
     sudo apt-get clean -y &&\
