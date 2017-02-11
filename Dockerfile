@@ -125,7 +125,7 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
 
 USER dev
 
-#ADD ssh_key_adder.rb /home/dev/ssh_key_adder.rb
+#ADD bin/ssh_key_adder.rb /home/dev/bin/ssh_key_adder.rb
 
 RUN \
 # Setup neovim
@@ -139,11 +139,19 @@ RUN \
     curl -L --create-dirs -o /home/dev/.config/fish/functions/rvm.fish https://raw.github.com/lunks/fish-nuggets/master/functions/rvm.fish &&\
     echo "rvm default" >> /home/dev/.config/fish/config.fish &&\
 
-# SSH script
-    curl -sL -o /home/dev/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/ssh_key_adder.rb &&\
-    chmod +x /home/dev/ssh_key_adder.rb &&\
-    wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip &&\
-    unzip ngrok-stable-linux-amd64.zip &&\
+# SSH script, ngrok, and startup script
+    curl -sL -o /home/dev/bin/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/bin/ssh_key_adder.rb &&\
+    chmod +x /home/dev/bin/ssh_key_adder.rb &&\
+    wget -O /home/dev/ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip &&\
+    unzip -d /home/dev/bin /home/dev/ngrok.zip &&\
+    rm /home/dev/ngrok.zip &&\
+    echo '#!/bin/bash\n\n\
+AUTHORIZED_GH_USERS=$1 /home/dev/bin/ssh_key_adder.rb\n\
+sudo /usr/sbin/sshd\n\
+/home/dev/bin/ngrok authtoken $2\n\
+/home/dev/bin/ngrok tcp 22\n' > /home/dev/bin/startup.sh &&\
+    chmod +x /home/dev/bin/startup.sh &&\
+
 
 # Clean up
     sudo apt-get clean -y &&\
@@ -158,8 +166,8 @@ RUN \
     RUN /bin/bash -c "source ~/.rvm/scripts/rvm;rvm use 2.4.0;gem install rake bundler rails github-auth git-duet seeing_is_believing --no-rdoc --no-ri"
 
 # Expose SSH
-#EXPOSE 22
+EXPOSE 22
 
 # Install the SSH keys of ENV-configured GitHub users before running the SSH
-# server process. See README for SSH instructions.
-CMD bash -c "AUTHORIZED_GH_USERS=$GH_USERS /home/dev/ssh_key_adder.rb;sudo /usr/sbin/sshd;/home/dev/ngrok authtoken $NGROK;ngrok tcp 22 &"
+# server process.
+CMD /home/dev/bin/startup.sh $GH_USERS $NGROK
