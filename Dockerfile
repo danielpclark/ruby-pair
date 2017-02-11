@@ -68,7 +68,7 @@ RUN git clone https://github.com/vim/vim.git &&\
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Copy .vimrc
-RUN curl -sL https://gist.githubusercontent.com/danielpclark/9a36480eafc82eeb9606/raw/0b8817da7374ea7064fc30249f99e7cecc34df85/.vimrc > /home/dev/.vimrc &&\
+RUN curl -sL https://gist.githubusercontent.com/danielpclark/9a36480eafc82eeb9606/raw/3a5a6ac0d76b09a454f922d1aa27cee1876adcf4/.vimrc > /home/dev/.vimrc &&\
 
 # Install Vundle
     git clone https://github.com/VundleVim/Vundle.vim.git /home/dev/.vim/bundle/Vundle.vim &&\
