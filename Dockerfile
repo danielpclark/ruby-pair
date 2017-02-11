@@ -140,7 +140,7 @@ RUN \
     echo "rvm default" >> /home/dev/.config/fish/config.fish &&\
 
 # SSH script, ngrok, and startup script
-    curl -sL -o /home/dev/bin/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/bin/ssh_key_adder.rb &&\
+    curl -sL -o /home/dev/bin/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/ssh_key_adder.rb &&\
     chmod +x /home/dev/bin/ssh_key_adder.rb &&\
     wget -O /home/dev/ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip &&\
     unzip -d /home/dev/bin /home/dev/ngrok.zip &&\
