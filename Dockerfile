@@ -68,7 +68,7 @@ RUN git clone https://github.com/vim/vim.git &&\
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Copy .vimrc
-RUN curl -sL https://gist.githubusercontent.com/danielpclark/9a36480eafc82eeb9606/raw/3a5a6ac0d76b09a454f922d1aa27cee1876adcf4/.vimrc > /home/dev/.vimrc &&\
+RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vimrc > /home/dev/.vimrc &&\
 
 # Install Vundle
     git clone https://github.com/VundleVim/Vundle.vim.git /home/dev/.vim/bundle/Vundle.vim &&\
@@ -124,7 +124,7 @@ RUN curl -sL https://gist.githubusercontent.com/danielpclark/9a36480eafc82eeb960
 
 USER dev
 
-ADD ssh_key_adder.rb /home/dev/ssh_key_adder.rb
+#ADD ssh_key_adder.rb /home/dev/ssh_key_adder.rb
 
 RUN \
 # Setup neovim
@@ -137,6 +137,9 @@ RUN \
     curl -sSL https://get.rvm.io | bash -s stable --ruby=2.4.0 &&\
     curl -L --create-dirs -o /home/dev/.config/fish/functions/rvm.fish https://raw.github.com/lunks/fish-nuggets/master/functions/rvm.fish &&\
     echo "rvm default" >> /home/dev/.config/fish/config.fish &&\
+
+# SSH script
+    curl -sL -o /home/dev/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/ssh_key_adder.rb &&\
 
 # Clean up
     sudo apt-get clean -y &&\
