@@ -4,7 +4,7 @@ LABEL Maintainer="Daniel P. Clark <6ftdan@gmail.com>" \
       Description="Remote pair programming environment with Ruby, Rust, VIM, RVM, neovim, tmux, SSH, and FishShell."
 
 ENV USER root
-ENV RUST_VERSION=1.15.1
+ENV RUST_VERSION=1.16.0
 
 # Start by changing the apt output, as stolen from Discourse's Dockerfiles.
 RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
