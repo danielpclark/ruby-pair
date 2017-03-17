@@ -147,6 +147,9 @@ RUN \
     sudo apt-get autoremove -y &&\
     sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Locale
+    sudo locale-gen "en_US.UTF-8"
+
 # Install the Github Auth gem, which will be used to get SSH keys from GitHub
 # to authorize users for SSH
     RUN /bin/bash -c "source ~/.rvm/scripts/rvm;rvm use 2.4.0;gem install rake bundler rails github-auth git-duet seeing_is_believing --no-rdoc --no-ri"
