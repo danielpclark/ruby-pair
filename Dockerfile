@@ -113,11 +113,6 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
     adduser dev sudo && \
     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers &&\
 
-# Clean up
-    apt-get clean -y &&\
-    apt-get autoremove -y &&\
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* &&\
-
 # Ownership
     chown -R dev.dev /home/dev &&\
     chown -R dev.dev /var/lib/gems
@@ -140,15 +135,7 @@ RUN \
 
 # SSH script
     curl -sL -o /home/dev/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/ssh_key_adder.rb &&\
-    chmod +x /home/dev/ssh_key_adder.rb &&\
-
-# Clean up
-    sudo apt-get clean -y &&\
-    sudo apt-get autoremove -y &&\
-    sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# Locale
-    sudo locale-gen "en_US.UTF-8"
+    chmod +x /home/dev/ssh_key_adder.rb
 
 # Install the Github Auth gem, which will be used to get SSH keys from GitHub
 # to authorize users for SSH
