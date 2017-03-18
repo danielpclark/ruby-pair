@@ -27,6 +27,7 @@ RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
 # Begin VIM build & install
 RUN git clone https://github.com/vim/vim.git &&\
     cd vim &&\
+    git checkout v8.0.0476 &&\
     ./configure --with-features=huge \
                 --enable-multibyte \
                 --enable-rubyinterp=yes \
@@ -145,7 +146,7 @@ RUN \
 # Clean up
     sudo apt-get clean -y &&\
     sudo apt-get autoremove -y &&\
-    sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* &&\
 
 # Locale
     sudo locale-gen "en_US.UTF-8"
