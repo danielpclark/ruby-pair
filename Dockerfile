@@ -5,6 +5,7 @@ LABEL Maintainer="Daniel P. Clark <6ftdan@gmail.com>" \
 
 ENV USER root
 ENV RUST_VERSION=1.16.0
+ENV RUBY_VERSION=2.4.1
 
 # Start by changing the apt output, as stolen from Discourse's Dockerfiles.
 RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
@@ -135,7 +136,7 @@ RUN \
 # Install RVM
     sudo apt-get update &&\
     gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 &&\
-    curl -sSL https://get.rvm.io | bash -s stable --ruby=2.4.0 &&\
+    curl -sSL https://get.rvm.io | bash -s stable --ruby=$RUBY_VERSION &&\
     curl -L --create-dirs -o /home/dev/.config/fish/functions/rvm.fish https://raw.github.com/lunks/fish-nuggets/master/functions/rvm.fish &&\
     echo "rvm default" >> /home/dev/.config/fish/config.fish &&\
 
@@ -163,7 +164,7 @@ sudo /usr/sbin/sshd\n\
 
 # Install the Github Auth gem, which will be used to get SSH keys from GitHub
 # to authorize users for SSH
-    RUN /bin/bash -c "source ~/.rvm/scripts/rvm;rvm use 2.4.1;gem install rake bundler rails github-auth git-duet seeing_is_believing --no-rdoc --no-ri"
+    RUN /bin/bash -c "source ~/.rvm/scripts/rvm;rvm use $RUBY_VERSION;gem install rake bundler rails github-auth git-duet seeing_is_believing --no-rdoc --no-ri"
 
 # Expose SSH
 EXPOSE 22
