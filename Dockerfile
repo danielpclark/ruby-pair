@@ -165,7 +165,7 @@ echo "web_addr: 0.0.0.0:$PORT" > /home/dev/.ngrok2/ngrok.yml
 
 # Install the Github Auth gem, which will be used to get SSH keys from GitHub
 # to authorize users for SSH
-    RUN /bin/bash -c "source ~/.rvm/scripts/rvm;rvm use $RUBY_VERSION;gem install rake bundler rails github-auth git-duet seeing_is_believing --no-rdoc --no-ri"
+    RUN /bin/bash -c "source /usr/share/rvm/scripts/rvm;rvm use $RUBY_VERSION;gem install rake bundler rails github-auth git-duet seeing_is_believing --no-rdoc --no-ri"
 
 # Expose SSH (local only, not Heroku)
 EXPOSE 22
