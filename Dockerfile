@@ -104,10 +104,6 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
     mkdir /var/run/sshd &&\
     echo "AllowAgentForwarding yes" >> /etc/ssh/sshd_config &&\
 
-# Try using SSH user/group for Heroku
-    groupadd -g 74 sshd &&\
-    useradd -u 74 -g 74 -c sshd -d / sshd &&\
-
 # Fix for occasional errors in perl stuff (git, ack) saying that locale vars
 # aren't set.
     locale-gen en_US en_US.UTF-8 && dpkg-reconfigure locales &&\
