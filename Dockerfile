@@ -52,15 +52,12 @@ RUN git clone https://github.com/vim/vim.git &&\
     ./rust-$RUST_VERSION-x86_64-unknown-linux-gnu/install.sh --without=rust-docs &&\
     rm -rf rust-$RUST_VERSION-x86_64-unknown-linux-gnu rust-$RUST_VERSION-x86_64-unknown-linux-gnu.tar.gz &&\
 
-# Make home directory
-    mkdir /home/dev &&\
-
 # Install Racer (Rust auto-completion for VIM)
     git clone https://github.com/phildawes/racer.git &&\
     cd racer &&\
     cargo build --release &&\
-    mkdir /home/dev/bin &&\
-    mv ./target/release/racer /home/dev/bin &&\
+    mkdir /root/bin &&\
+    mv ./target/release/racer /root/bin &&\
     cd .. &&\
     rm -rf racer &&\
 
@@ -70,17 +67,17 @@ RUN git clone https://github.com/vim/vim.git &&\
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Copy .vimrc
-RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vimrc > /home/dev/.vimrc &&\
+RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vimrc > /root/.vimrc &&\
 
 # Install Vundle
-    git clone https://github.com/VundleVim/Vundle.vim.git /home/dev/.vim/bundle/Vundle.vim &&\
+    git clone https://github.com/VundleVim/Vundle.vim.git /root/.vim/bundle/Vundle.vim &&\
 
 # Install VIM plugins
-    HOME=/home/dev vim +PluginInstall +qall &&\
+    HOME=/root vim +PluginInstall +qall &&\
 
 # Manually update DB Ext plugin
-    curl -L --create-dirs -o /home/dev/.vim/bundle/dbext.vim/dbext_2500.zip http://www.vim.org/scripts/download_script.php\?src_id=24935 &&\
-    cd /home/dev/.vim/bundle/dbext.vim/ &&\
+    curl -L --create-dirs -o /root/.vim/bundle/dbext.vim/dbext_2500.zip http://www.vim.org/scripts/download_script.php\?src_id=24935 &&\
+    cd /root/.vim/bundle/dbext.vim/ &&\
     unzip dbext_2500.zip &&\
     rm dbext_2500.zip &&\
     cd - &&\
@@ -96,7 +93,7 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
 
 # Install fish
     apt-get install -y fish &&\
-    curl -L --create-dirs -o /home/dev/.config/fish/functions/fish_prompt.fish https://raw.githubusercontent.com/danielpclark/fish_prompt/master/fish_prompt.fish &&\
+    curl -L --create-dirs -o /root/.config/fish/functions/fish_prompt.fish https://raw.githubusercontent.com/danielpclark/fish_prompt/master/fish_prompt.fish &&\
 
 # Install a couple of helpful utilities
     apt-get install -y ack-grep &&\
@@ -111,7 +108,7 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
 # aren't set.
     locale-gen en_US en_US.UTF-8 && dpkg-reconfigure locales &&\
 
-    useradd dev -d /home/dev -m -s /usr/bin/fish &&\
+    useradd dev -d /root -m -s /usr/bin/fish &&\
     adduser dev sudo && \
     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers &&\
 
@@ -121,38 +118,38 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* &&\
 
 # Ownership
-    chown -R dev.dev /home/dev &&\
+    chown -R dev.dev /root &&\
     chown -R dev.dev /var/lib/gems
 
 #USER dev
 
-#ADD bin/ssh_key_adder.rb /home/dev/bin/ssh_key_adder.rb
+#ADD bin/ssh_key_adder.rb /root/bin/ssh_key_adder.rb
 
 RUN \
 # Setup neovim
-    ln -s /home/dev/.vim /home/dev/.config/nvim &&\
-    ln -s /home/dev/.vimrc /home/dev/.config/nvim/init.vim &&\
+    ln -s /root/.vim /root/.config/nvim &&\
+    ln -s /root/.vimrc /root/.config/nvim/init.vim &&\
  
 # Install RVM
     sudo apt-get update &&\
     gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 &&\
     curl -sSL https://get.rvm.io | sudo bash -s stable --ruby=$RUBY_VERSION &&\
-    curl -L --create-dirs -o /home/dev/.config/fish/functions/rvm.fish https://raw.github.com/lunks/fish-nuggets/master/functions/rvm.fish &&\
-    echo "rvm default" >> /home/dev/.config/fish/config.fish &&\
+    curl -L --create-dirs -o /root/.config/fish/functions/rvm.fish https://raw.github.com/lunks/fish-nuggets/master/functions/rvm.fish &&\
+    echo "rvm default" >> /root/.config/fish/config.fish &&\
 
 # SSH script, ngrok, and startup script
-    curl -sL -o /home/dev/bin/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/ssh_key_adder.rb &&\
-    chmod +x /home/dev/bin/ssh_key_adder.rb &&\
-    wget -O /home/dev/ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip &&\
-    unzip -d /usr/bin /home/dev/ngrok.zip &&\
-    rm /home/dev/ngrok.zip &&\
+    curl -sL -o /root/bin/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/ssh_key_adder.rb &&\
+    chmod +x /root/bin/ssh_key_adder.rb &&\
+    wget -O /root/ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip &&\
+    unzip -d /usr/bin /root/ngrok.zip &&\
+    rm /root/ngrok.zip &&\
     echo '#!/bin/bash\n\n\
-AUTHORIZED_GH_USERS=$1 /home/dev/bin/ssh_key_adder.rb\n\
+AUTHORIZED_GH_USERS=$1 /root/bin/ssh_key_adder.rb\n\
 sudo /usr/sbin/sshd\n\
-echo "web_addr: 0.0.0.0:$PORT" > /home/dev/.ngrok2/ngrok.yml
+echo "web_addr: 0.0.0.0:$PORT" > /root/.ngrok2/ngrok.yml\n\
 /usr/bin/ngrok authtoken $2\n\
-/usr/bin/ngrok tcp 22\n' > /home/dev/bin/startup.sh &&\
-    chmod +x /home/dev/bin/startup.sh &&\
+/usr/bin/ngrok tcp 22\n' > /root/bin/startup.sh &&\
+    chmod +x /root/bin/startup.sh &&\
 
 
 # Clean up
@@ -172,4 +169,4 @@ EXPOSE 22
 
 # Install the SSH keys of ENV-configured GitHub users before running the SSH
 # server process.
-CMD /home/dev/bin/startup.sh $GH_USERS $NGROK
+CMD /root/bin/startup.sh $GH_USERS $NGROK
