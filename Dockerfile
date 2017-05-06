@@ -94,6 +94,9 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
     cp /usr/local/share/wemux/wemux.conf.example /usr/local/etc/wemux.conf &&\
     echo "host_list=(dev)" >> /usr/local/etc/wemux.conf &&\
 
+# Rails needs a JavaScript runtime
+    apt-get install -y nodejs &&\
+
 # Install fish
     apt-get install -y fish &&\
     curl -L --create-dirs -o /home/dev/.config/fish/functions/fish_prompt.fish https://raw.githubusercontent.com/danielpclark/fish_prompt/master/fish_prompt.fish &&\
