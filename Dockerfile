@@ -103,6 +103,10 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
     apt-get install -y openssh-server &&\
     mkdir /var/run/sshd &&\
     echo "AllowAgentForwarding yes" >> /etc/ssh/sshd_config &&\
+    echo "root:$RTPW" | chpasswd &&\
+    sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config &&\
+    sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd &&\
+    echo "export VISIBLE=now" >> /etc/profile &&\
 
 # Fix for occasional errors in perl stuff (git, ack) saying that locale vars
 # aren't set.
