@@ -112,7 +112,7 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
 # aren't set.
     locale-gen en_US en_US.UTF-8 && dpkg-reconfigure locales &&\
 
-    ln -s /root /home/dev
+    ln -s /root /home/dev &&\
     useradd dev -d /root -m -s /usr/bin/fish &&\
     adduser dev sudo &&\
     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers &&\
