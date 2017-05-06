@@ -118,7 +118,7 @@ RUN \
     chmod +x /root/bin/startup.sh &&\
 
 # Set home directory and current directory
-    echo 'set -x HOME /root\n/root' >> /root/.config/fish/config.fish
+    echo 'set -x HOME /root\n/root' >> /root/.config/fish/config.fish &&\
 
 # Clean up
     sudo apt-get clean -y &&\
