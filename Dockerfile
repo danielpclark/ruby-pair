@@ -112,17 +112,13 @@ RUN \
     curl -L --create-dirs -o /root/.config/fish/functions/rvm.fish https://raw.github.com/lunks/fish-nuggets/master/functions/rvm.fish &&\
     echo "rvm default" >> /root/.config/fish/config.fish &&\
 
-# Startup script
+# Startup script (nothing for now)
     echo '#!/bin/bash\n\n\
-export HOME=/root\n\
-export XDG_CONFIG_HOME=/root/.config\n\
-export WORKDIR=/root\n\
-export rvm_path=/usr/local/rvm\n\
-export rvm_prefix=/usr/local\n\
-export rvm_bin_path=/usr/local/rvm/bin\n\
-export rvm_delete_flag=0\n' > /root/bin/startup.sh &&\
+' > /root/bin/startup.sh &&\
     chmod +x /root/bin/startup.sh &&\
 
+# Set home directory and current directory
+    echo 'set -x HOME /root\n/root' >> /root/.config/fish/config.fish
 
 # Clean up
     sudo apt-get clean -y &&\
