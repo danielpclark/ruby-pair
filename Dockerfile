@@ -114,7 +114,7 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
 
     ln -s /root /home/dev
     useradd dev -d /root -m -s /usr/bin/fish &&\
-    adduser dev sudo && \
+    adduser dev sudo &&\
     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers &&\
 
 # Clean up
