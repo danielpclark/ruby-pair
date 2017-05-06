@@ -1,12 +1,11 @@
 FROM ubuntu:16.10
 LABEL Maintainer="Daniel P. Clark <6ftdan@gmail.com>" \
       Version="1.0" \
-      Description="Heroku version: Remote pair programming environment with Ruby, Rust, VIM, RVM, neovim, tmux, SSH, and FishShell."
+      Description="Heroku version: No pair programming version (sshd failed to run)."
 
 ENV USER root
 ENV RUST_VERSION=1.16.0
 ENV RUBY_VERSION=2.4.1
-ENV RTPW=snuffleupagus
 
 # Start by changing the apt output, as stolen from Discourse's Dockerfiles.
 RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
@@ -83,14 +82,9 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
     rm dbext_2500.zip &&\
     cd - &&\
 
-# Set up for pairing with wemux and install neovim
-    add-apt-repository ppa:neovim-ppa/unstable &&\
+# Set up for tmux
     apt-get update &&\
-    apt-get install -y tmux neovim &&\
-    git clone git://github.com/zolrath/wemux.git /usr/local/share/wemux &&\
-    ln -s /usr/local/share/wemux/wemux /usr/local/bin/wemux &&\
-    cp /usr/local/share/wemux/wemux.conf.example /usr/local/etc/wemux.conf &&\
-    echo "host_list=(dev)" >> /usr/local/etc/wemux.conf &&\
+    apt-get install -y tmux &&\
 
 # Install fish
     apt-get install -y fish &&\
@@ -99,43 +93,18 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
 # Install a couple of helpful utilities
     apt-get install -y ack-grep &&\
 
-# Set up SSH. We set up SSH forwarding so that transactions like git pushes
-# from the container happen magically.
-    apt-get install -y openssh-server &&\
-    mkdir /var/run/sshd &&\
-    echo "AllowAgentForwarding yes" >> /etc/ssh/sshd_config &&\
-    chpasswd root:$RTPW &&\
-    sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config &&\
-    sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd &&\
-    echo "export VISIBLE=now" >> /etc/profile &&\
-
 # Fix for occasional errors in perl stuff (git, ack) saying that locale vars
 # aren't set.
     locale-gen en_US en_US.UTF-8 && dpkg-reconfigure locales &&\
 
     ln -s /root /home/dev &&\
-    useradd dev -d /root -m -s /usr/bin/fish &&\
-    adduser dev sudo &&\
-    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers &&\
 
 # Clean up
     apt-get clean -y &&\
     apt-get autoremove -y &&\
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* &&\
 
-# Ownership
-    chown -R dev.dev /root &&\
-    chown -R dev.dev /var/lib/gems
-
-#USER dev
-
-#ADD bin/ssh_key_adder.rb /root/bin/ssh_key_adder.rb
-
 RUN \
-# Setup neovim
-    ln -s /root/.vim /root/.config/nvim &&\
-    ln -s /root/.vimrc /root/.config/nvim/init.vim &&\
- 
 # Install RVM
     sudo apt-get update &&\
     gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 &&\
@@ -143,20 +112,15 @@ RUN \
     curl -L --create-dirs -o /root/.config/fish/functions/rvm.fish https://raw.github.com/lunks/fish-nuggets/master/functions/rvm.fish &&\
     echo "rvm default" >> /root/.config/fish/config.fish &&\
 
-# SSH script, ngrok, and startup script
-    curl -sL -o /root/bin/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/ssh_key_adder.rb &&\
-    chmod +x /root/bin/ssh_key_adder.rb &&\
-    wget -O /root/ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip &&\
-    unzip -d /usr/bin /root/ngrok.zip &&\
-    rm /root/ngrok.zip &&\
+# Startup script
     echo '#!/bin/bash\n\n\
 export HOME=/root\n\
-AUTHORIZED_GH_USERS=$1 /root/bin/ssh_key_adder.rb\n\
-/usr/sbin/sshd\n\
-mkdir /root/.ngrok2\n\
-echo "web_addr: 0.0.0.0:$PORT" > /root/.ngrok2/ngrok.yml\n\
-/usr/bin/ngrok authtoken $2\n\
-/usr/bin/ngrok tcp 22\n' > /root/bin/startup.sh &&\
+export XDG_CONFIG_HOME=/root/.config\n\
+export WORKDIR=/root\n\
+export rvm_path=/usr/local/rvm\n\
+export rvm_prefix=/usr/local\n\
+export rvm_bin_path=/usr/local/rvm/bin\n\
+export rvm_delete_flag=0\n' > /root/bin/startup.sh &&\
     chmod +x /root/bin/startup.sh &&\
 
 
@@ -172,9 +136,4 @@ echo "web_addr: 0.0.0.0:$PORT" > /root/.ngrok2/ngrok.yml\n\
 # to authorize users for SSH
     RUN /bin/bash -c "source /usr/local/rvm/scripts/rvm;rvm use $RUBY_VERSION;gem install rake bundler rails github-auth git-duet seeing_is_believing --no-rdoc --no-ri"
 
-# Expose SSH (local only, not Heroku)
-EXPOSE 22
-
-# Install the SSH keys of ENV-configured GitHub users before running the SSH
-# server process.
-CMD /root/bin/startup.sh $GH_USERS $NGROK
+CMD /root/bin/startup.sh
