@@ -86,6 +86,9 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
     apt-get update &&\
     apt-get install -y tmux &&\
 
+# Rails needs a JavaScript runtime
+    apt-get install -y nodejs &&\
+
 # Install fish
     apt-get install -y fish &&\
     curl -L --create-dirs -o /root/.config/fish/functions/fish_prompt.fish https://raw.githubusercontent.com/danielpclark/fish_prompt/master/fish_prompt.fish &&\
