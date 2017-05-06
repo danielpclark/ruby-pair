@@ -144,8 +144,10 @@ RUN \
     unzip -d /usr/bin /root/ngrok.zip &&\
     rm /root/ngrok.zip &&\
     echo '#!/bin/bash\n\n\
+export HOME=/root\n\
 AUTHORIZED_GH_USERS=$1 /root/bin/ssh_key_adder.rb\n\
-sudo /usr/sbin/sshd\n\
+/usr/sbin/sshd\n\
+mkdir /root/.ngrok2\n\
 echo "web_addr: 0.0.0.0:$PORT" > /root/.ngrok2/ngrok.yml\n\
 /usr/bin/ngrok authtoken $2\n\
 /usr/bin/ngrok tcp 22\n' > /root/bin/startup.sh &&\
