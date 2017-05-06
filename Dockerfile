@@ -102,7 +102,7 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
 # Clean up
     apt-get clean -y &&\
     apt-get autoremove -y &&\
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* &&\
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN \
 # Install RVM
