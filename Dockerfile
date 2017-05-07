@@ -95,6 +95,11 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
 
 # Install a couple of helpful utilities
     apt-get install -y ack-grep &&\
+    
+# Add ngrok
+    wget -O /root/ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip &&\
+    unzip -d /usr/bin /root/ngrok.zip &&\
+    rm /root/ngrok.zip &&\
 
 # Fix for occasional errors in perl stuff (git, ack) saying that locale vars
 # aren't set.
