@@ -4,7 +4,8 @@ LABEL Maintainer="Daniel P. Clark <6ftdan@gmail.com>" \
       Description="Remote pair programming environment with Ruby, Rust, VIM, RVM, neovim, tmux, SSH, and FishShell."
 
 ENV USER root
-ENV RUST_VERSION=1.16.0
+ENV RUST_VERSION=1.17.0
+ENV RUBY_VERSION=2.4.1
 
 # Start by changing the apt output, as stolen from Discourse's Dockerfiles.
 RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
@@ -93,6 +94,9 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
     cp /usr/local/share/wemux/wemux.conf.example /usr/local/etc/wemux.conf &&\
     echo "host_list=(dev)" >> /usr/local/etc/wemux.conf &&\
 
+# Rails needs a JavaScript runtime
+    apt-get install -y nodejs &&\
+
 # Install fish
     apt-get install -y fish &&\
     curl -L --create-dirs -o /home/dev/.config/fish/functions/fish_prompt.fish https://raw.githubusercontent.com/danielpclark/fish_prompt/master/fish_prompt.fish &&\
@@ -125,7 +129,7 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
 
 USER dev
 
-#ADD ssh_key_adder.rb /home/dev/ssh_key_adder.rb
+#ADD bin/ssh_key_adder.rb /home/dev/bin/ssh_key_adder.rb
 
 RUN \
 # Setup neovim
@@ -135,13 +139,22 @@ RUN \
 # Install RVM
     sudo apt-get update &&\
     gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 &&\
-    curl -sSL https://get.rvm.io | bash -s stable --ruby=2.4.0 &&\
+    curl -sSL https://get.rvm.io | bash -s stable --ruby=$RUBY_VERSION &&\
     curl -L --create-dirs -o /home/dev/.config/fish/functions/rvm.fish https://raw.github.com/lunks/fish-nuggets/master/functions/rvm.fish &&\
     echo "rvm default" >> /home/dev/.config/fish/config.fish &&\
 
-# SSH script
-    curl -sL -o /home/dev/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/ssh_key_adder.rb &&\
-    chmod +x /home/dev/ssh_key_adder.rb &&\
+# SSH script, ngrok, and startup script
+    curl -sL -o /home/dev/bin/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/ssh_key_adder.rb &&\
+    chmod +x /home/dev/bin/ssh_key_adder.rb &&\
+    wget -O /home/dev/ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip &&\
+    unzip -d /home/dev/bin /home/dev/ngrok.zip &&\
+    rm /home/dev/ngrok.zip &&\
+    echo '#!/bin/bash\n\n\
+AUTHORIZED_GH_USERS=$1 /home/dev/bin/ssh_key_adder.rb\n\
+sudo /usr/sbin/sshd\n\
+/home/dev/bin/ngrok authtoken $2\n\
+/home/dev/bin/ngrok tcp 22\n' > /home/dev/bin/startup.sh &&\
+    chmod +x /home/dev/bin/startup.sh &&\
 
 # Clean up
     sudo apt-get clean -y &&\
@@ -153,11 +166,11 @@ RUN \
 
 # Install the Github Auth gem, which will be used to get SSH keys from GitHub
 # to authorize users for SSH
-    RUN /bin/bash -c "source ~/.rvm/scripts/rvm;rvm use 2.4.0;gem install rake bundler rails github-auth git-duet seeing_is_believing --no-rdoc --no-ri"
+    RUN /bin/bash -c "source ~/.rvm/scripts/rvm;rvm use $RUBY_VERSION;gem install rake bundler rails github-auth git-duet seeing_is_believing --no-rdoc --no-ri"
 
 # Expose SSH
 EXPOSE 22
 
 # Install the SSH keys of ENV-configured GitHub users before running the SSH
-# server process. See README for SSH instructions.
-CMD /home/dev/ssh_key_adder.rb && sudo /usr/sbin/sshd -D
+# server process.
+CMD /home/dev/bin/startup.sh $GH_USERS $NGROK
