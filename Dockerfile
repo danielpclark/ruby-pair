@@ -156,7 +156,6 @@ sudo /usr/sbin/sshd\n\
 /home/dev/bin/ngrok tcp 22\n' > /home/dev/bin/startup.sh &&\
     chmod +x /home/dev/bin/startup.sh &&\
 
-
 # Clean up
     sudo apt-get clean -y &&\
     sudo apt-get autoremove -y &&\
