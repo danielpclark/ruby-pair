@@ -18,7 +18,7 @@ RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
         libgtk2.0-dev libatk1.0-dev libbonoboui2-dev libssl-dev \
         libcairo2-dev libx11-dev libxpm-dev libxt-dev python-dev \
         ruby-dev lua5.1 liblua5.1-0-dev libperl-dev nano tzdata \
-        locales cmake &&\
+        locales cmake ghc-mod &&\
  # Add repos for Node and Yarn
     curl -sL https://deb.nodesource.com/setup_9.x | bash - ;\
     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - ;\
@@ -76,23 +76,34 @@ RUN git clone https://github.com/vim/vim.git &&\
 
 # All the VIM stuff
 # Copy .vimrc
-RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vimrc > /home/dev/.vimrc &&\
+RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vimrc > /home/dev/.vimrc;\
 
 # Install Vundle
-    git clone https://github.com/VundleVim/Vundle.vim.git /home/dev/.vim/bundle/Vundle.vim &&\
+    git clone https://github.com/VundleVim/Vundle.vim.git /home/dev/.vim/bundle/Vundle.vim;\
 
 # Install VIM plugins
-    HOME=/home/dev vim +PluginInstall +qall &&\
+    HOME=/home/dev vim +PluginInstall +qall
 
 # YouCompleteMe
-    cd /home/dev/.vim/bundle/YouCompleteMe &&\
+RUN cd /home/dev/.vim/bundle/YouCompleteMe &&\
     ./install.py --clang-completer  \
                  --js-completer     \
                  --rust-completer &&\
-    cd /home/dev &&\
+    cd /home/dev
+
+# vimproc
+RUN cd /home/dev/.vim/bundle/vimproc && make &&\
+    cd /home/dev
+
+# # Haskell Stack
+# RUN curl -SL -o /home/dev/stack-1.6.5-linux-x86_64.tar.gz \
+#     https://github.com/commercialhaskell/stack/releases/download/v1.6.5/stack-1.6.5-linux-x86_64.tar.gz &&\
+#     tar -xzf /home/dev/stack-1.6.5-linux-x86_64.tar.gz &&\
+#     mv stack-1.6.5-linux-x86_64/stack /home/dev/bin/stack &&\
+#     rm -rf stack-1.6.5-linux-x86_64*
 
 # Manually update DB Ext plugin
-    curl -L --create-dirs -o /home/dev/.vim/bundle/dbext.vim/dbext_2500.zip http://www.vim.org/scripts/download_script.php\?src_id=24935 &&\
+RUN curl -L --create-dirs -o /home/dev/.vim/bundle/dbext.vim/dbext_2500.zip http://www.vim.org/scripts/download_script.php\?src_id=24935 &&\
     cd /home/dev/.vim/bundle/dbext.vim/ &&\
     unzip dbext_2500.zip &&\
     rm dbext_2500.zip &&\
@@ -110,6 +121,7 @@ RUN add-apt-repository ppa:neovim-ppa/unstable &&\
 # Install fish
     apt-get install -y fish &&\
     curl -L --create-dirs -o /home/dev/.config/fish/functions/fish_prompt.fish https://raw.githubusercontent.com/danielpclark/fish_prompt/master/fish_prompt.fish &&\
+    echo "set PATH /home/dev/bin $PATH" >> /home/dev/.config/fish.config &&\
 
 # Install a couple of helpful utilities
     apt-get install -y ack-grep &&\
@@ -148,7 +160,7 @@ RUN \
 # Install RVM
     sudo apt-get update &&\
     gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 &&\
-    curl -sSL https://get.rvm.io | bash -s stable --ruby=$RUBY_VERSION &&\
+    curl -SL https://get.rvm.io | bash -s stable --ruby=$RUBY_VERSION &&\
     curl -L --create-dirs -o /home/dev/.config/fish/functions/rvm.fish https://raw.github.com/lunks/fish-nuggets/master/functions/rvm.fish &&\
     echo "rvm default" >> /home/dev/.config/fish/config.fish &&\
 
@@ -158,7 +170,7 @@ RUN \
     sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # SSH script, ngrok, and startup script
-RUN curl -sL -o /home/dev/bin/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/ssh_key_adder.rb &&\
+RUN curl -SL -o /home/dev/bin/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/ssh_key_adder.rb &&\
     chmod +x /home/dev/bin/ssh_key_adder.rb &&\
     wget -O /home/dev/ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip &&\
     unzip -d /home/dev/bin /home/dev/ngrok.zip &&\
