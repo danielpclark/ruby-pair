@@ -120,8 +120,9 @@ RUN add-apt-repository ppa:neovim-ppa/unstable &&\
 
 # Install fish
     apt-get install -y fish &&\
+    mkdir -p /home/dev/.config/fish &&\
     curl -L --create-dirs -o /home/dev/.config/fish/functions/fish_prompt.fish https://raw.githubusercontent.com/danielpclark/fish_prompt/master/fish_prompt.fish &&\
-    echo "set PATH /home/dev/bin $PATH" >> /home/dev/.config/fish.config &&\
+    echo "set PATH /home/dev/bin $PATH" >> /home/dev/.config/fish/fish.config &&\
 
 # Install a couple of helpful utilities
     apt-get install -y ack-grep &&\
