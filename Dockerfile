@@ -1,6 +1,6 @@
 FROM phusion/baseimage:0.10.0
 LABEL Maintainer="Daniel P. Clark <6ftdan@gmail.com>" \
-      Version="1.1" \
+      Version="1.1.1" \
       Description="Remote pair programming environment with Ruby, NodeJS, Yarn, Rust, VIM, RVM, neovim, tmux, SSH, and FishShell."
 
 ENV USER root
@@ -18,7 +18,7 @@ RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
         libgtk2.0-dev libatk1.0-dev libbonoboui2-dev libssl-dev \
         libcairo2-dev libx11-dev libxpm-dev libxt-dev python-dev \
         ruby-dev lua5.1 liblua5.1-0-dev libperl-dev nano tzdata \
-        locales &&\
+        locales cmake &&\
  # Add repos for Node and Yarn
     curl -sL https://deb.nodesource.com/setup_9.x | bash - ;\
     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - ;\
@@ -83,6 +83,13 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
 
 # Install VIM plugins
     HOME=/home/dev vim +PluginInstall +qall &&\
+
+# YouCompleteMe
+    cd /home/dev/.vim/bundle/YouCompleteMe &&\
+    ./install.py --clang-completer  \
+                 --js-completer     \
+                 --rust-completer &&\
+    cd /home/dev &&\
 
 # Manually update DB Ext plugin
     curl -L --create-dirs -o /home/dev/.vim/bundle/dbext.vim/dbext_2500.zip http://www.vim.org/scripts/download_script.php\?src_id=24935 &&\
