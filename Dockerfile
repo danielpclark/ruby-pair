@@ -1,6 +1,6 @@
 FROM phusion/baseimage:0.10.0
 LABEL Maintainer="Daniel P. Clark <6ftdan@gmail.com>" \
-      Version="1.1.1" \
+      Version="1.1.0" \
       Description="Remote pair programming environment with Ruby, NodeJS, Yarn, Rust, VIM, RVM, neovim, tmux, SSH, and FishShell."
 
 ENV USER root
