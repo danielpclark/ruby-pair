@@ -20,9 +20,8 @@ begin
   end
 rescue
   puts <<-EOS
-    You need to specify an #{ENV_KEY} environment variables as a
-    comma-separated list of GitHub users whose SSH keys should be authorized to
-    connect to this machine!
+    You need to specify environment variables as a comma-separated list of GitHub
+    users whose SSH keys should be authorized to connect to this machine!
   EOS
   exit 1
 end
