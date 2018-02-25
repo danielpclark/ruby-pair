@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-USERS = ARGV[1] || ENV["AUTHORIZED_GH_USERS"]
+USERS = ARGV[0] || ENV["AUTHORIZED_GH_USERS"]
 
 begin
   `mkdir --mode=700 /home/dev/.ssh`
