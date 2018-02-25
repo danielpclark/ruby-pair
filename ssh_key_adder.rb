@@ -1,12 +1,12 @@
 #!/usr/bin/ruby
 
-ENV_KEY = "AUTHORIZED_GH_USERS"
+USERS = ARGV[1] || ENV["AUTHORIZED_GH_USERS"]
 
 begin
   `mkdir --mode=700 /home/dev/.ssh`
   `touch /home/dev/.ssh/authorized_keys`
   `chmod 600 /home/dev/.ssh/authorized_keys`
-  ENV[ENV_KEY].split(",").map(&:strip).each do |username|
+  USERS.split(",").map(&:strip).each do |username|
     output = `gh-auth add --users=#{username}`
     if output.include?("Adding 0 key")
       puts <<-EOS
