@@ -7,7 +7,7 @@ begin
   `touch /home/dev/.ssh/authorized_keys`
   `chmod 600 /home/dev/.ssh/authorized_keys`
   USERS.split(",").map(&:strip).each do |username|
-    output = `gh-auth add --users=#{username}`
+    output = `/usr/bin/fish -l -c 'gh-auth add --users=#{username}'`
     if output.include?("Adding 0 key")
       puts <<-EOS
         The user '#{username}' either does not exist on GitHub or does not have
