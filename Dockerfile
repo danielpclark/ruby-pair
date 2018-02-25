@@ -204,7 +204,5 @@ ENV HOME /home/dev
 # Install the SSH keys of ENV-configured GitHub users before running the SSH
 # server process.
 SHELL ["/usr/bin/fish", "-l", "-c"]
-CMD /home/dev/bin/ssh_key_adder.rb\
-    $AUTHORIZED_GH_USERS;\
-    /home/dev/bin/boot.sh\
-    $NGROK
+CMD /home/dev/bin/ssh_key_adder.rb $AUTHORIZED_GH_USERS;\
+    exec /home/dev/bin/boot.sh $NGROK
