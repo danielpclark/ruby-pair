@@ -1,6 +1,6 @@
 FROM phusion/baseimage:0.10.0
 LABEL Maintainer="Daniel P. Clark <6ftdan@gmail.com>" \
-      Version="1.1.0" \
+      Version="1.1.1" \
       Description="Remote pair programming environment with Ruby, NodeJS, Yarn, Rust, VIM, RVM, neovim, tmux, SSH, and FishShell."
 
 ENV USER root
@@ -177,8 +177,16 @@ RUN curl -SL -o /home/dev/bin/ssh_key_adder.rb https://raw.githubusercontent.com
     unzip -d /home/dev/bin /home/dev/ngrok.zip &&\
     rm /home/dev/ngrok.zip &&\
     sudo rm -f /etc/service/sshd/down &&\
-    sudo curl -sL -o /etc/ssh/sshd_config https://raw.githubusercontent.com/danielpclark/ruby-pair/master/sshd_config &&\
+    sudo curl -SL -o /etc/ssh/sshd_config https://raw.githubusercontent.com/danielpclark/ruby-pair/master/sshd_config &&\
     sudo /etc/my_init.d/00_regen_ssh_host_keys.sh &&\
+    echo '#!/bin/bash\n\
+if [ -z "$1" ]; then\n\
+  exec /usr/bin/sudo /sbin/my_init\n\
+else \n\
+  /home/dev/bin/ngrok authtoken $1\n\
+  exec /usr/bin/sudo /sbin/my_init /home/dev/bin/ngrok tcp 22\n\
+fi' > /home/dev/bin/boot.sh &&\
+    chmod +x /home/dev/bin/boot.sh &&\
 
 # Locale
     sudo locale-gen "en_US.UTF-8"
@@ -196,7 +204,7 @@ ENV HOME /home/dev
 # Install the SSH keys of ENV-configured GitHub users before running the SSH
 # server process.
 SHELL ["/usr/bin/fish", "-l", "-c"]
-CMD set -x AUTHORIZED_GH_USERS $AUTHORIZED_GH_USERS;\
-    /home/dev/bin/ssh_key_adder.rb ;\
-    /home/dev/bin/ngrok authtoken $NGROK ;\
-    /usr/bin/sudo /sbin/my_init /home/dev/bin/ngrok tcp 22
+CMD /home/dev/bin/ssh_key_adder.rb\
+    $AUTHORIZED_GH_USERS;\
+    /home/dev/bin/boot.sh\
+    $NGROK
