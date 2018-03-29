@@ -1,11 +1,11 @@
 FROM phusion/baseimage:0.10.0
 LABEL Maintainer="Daniel P. Clark <6ftdan@gmail.com>" \
-      Version="1.1.1" \
+      Version="1.1.2" \
       Description="Remote pair programming environment with Ruby, NodeJS, Yarn, Rust, VIM, RVM, neovim, tmux, SSH, and FishShell."
 
 ENV USER root
-ENV RUST_VERSION=1.24.0
-ENV RUBY_VERSION=2.5.0
+ENV RUST_VERSION=1.25.0
+ENV RUBY_VERSION=2.5.1
 
 # Start by changing the apt output, as stolen from Discourse's Dockerfiles.
 RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
@@ -33,7 +33,7 @@ RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
 # Begin VIM build & install
 RUN git clone https://github.com/vim/vim.git &&\
     cd vim &&\
-    git checkout v8.0.0476 &&\
+    git checkout v8.0.1648 &&\
     ./configure --with-features=huge \
                 --enable-multibyte \
                 --enable-rubyinterp=yes \
