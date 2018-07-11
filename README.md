@@ -1,14 +1,14 @@
 My ideal shell development environment. Originally taken from a pair programming image https://github.com/dpetersen/dev-container-base
 
 ## Includes
-* phusion/baseimage base Docker image for a genuine Linux system environment
+* Ubuntu 18.04
 * SSH support (github user account used for SSH login permission)
 * tmux
 * VIM (compiled in container) with plugins (racer, ctags, YouCompleteMe, syntax-highlighting, and more)
 * neovim
-* RVM: Ruby 2.5.0 installed with some basic gems included (rake, bundler, github-auth)
+* RVM: Ruby 2.5.1 installed with some basic gems included (rake, bundler, github-auth)
 * RVM (adjusted for FishShell)
-* Rust version 1.24.0
+* Rust version 1.27.1
 * NodeJS
 * Yarn
 * Fish Shell with custom Github centeric prompt

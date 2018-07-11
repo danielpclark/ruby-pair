@@ -1,11 +1,13 @@
-FROM phusion/baseimage:0.10.0
+FROM ubuntu:18.04
 LABEL Maintainer="Daniel P. Clark <6ftdan@gmail.com>" \
       Version="1.1.2" \
       Description="Remote pair programming environment with Ruby, NodeJS, Yarn, Rust, VIM, RVM, neovim, tmux, SSH, and FishShell."
 
 ENV USER root
-ENV RUST_VERSION=1.25.0
+ENV RUST_VERSION=1.27.1
 ENV RUBY_VERSION=2.5.1
+ENV VIM_VERSION=v8.1.0005
+ENV RACER_VERSION=2.0.14
 
 # Start by changing the apt output, as stolen from Discourse's Dockerfiles.
 RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
@@ -33,7 +35,7 @@ RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
 # Begin VIM build & install
 RUN git clone https://github.com/vim/vim.git &&\
     cd vim &&\
-    git checkout v8.0.1648 &&\
+    git checkout $VIM_VERSION &&\
     ./configure --with-features=huge \
                 --enable-multibyte \
                 --enable-rubyinterp=yes \
@@ -42,7 +44,7 @@ RUN git clone https://github.com/vim/vim.git &&\
                 --enable-perlinterp=yes \
                 --enable-luainterp=yes \
                 --enable-gui=gtk2 --enable-cscope --prefix=/usr &&\
-    make VIMRUNTIMEDIR=/usr/share/vim/vim80 &&\
+    make VIMRUNTIMEDIR=/usr/share/vim/vim81 &&\
     make install &&\
     cd .. &&\
     rm -rf vim &&\
@@ -58,21 +60,17 @@ RUN git clone https://github.com/vim/vim.git &&\
     rm -rf rust-$RUST_VERSION-x86_64-unknown-linux-gnu rust-$RUST_VERSION-x86_64-unknown-linux-gnu.tar.gz &&\
 
 # Make home directory
-    mkdir /home/dev &&\
+    mkdir /home/dev
 
 # Install Racer (Rust auto-completion for VIM)
-    git clone https://github.com/phildawes/racer.git &&\
+RUN git clone https://github.com/phildawes/racer.git &&\
     cd racer &&\
+    git checkout $RACER_VERSION &&\
     cargo build --release &&\
     mkdir /home/dev/bin &&\
     mv ./target/release/racer /home/dev/bin &&\
     cd .. &&\
-    rm -rf racer &&\
-
-# Clean up
-    apt-get clean -y &&\
-    apt-get autoremove -y &&\
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    rm -rf racer
 
 # All the VIM stuff
 # Copy .vimrc
@@ -122,7 +120,7 @@ RUN add-apt-repository ppa:neovim-ppa/unstable &&\
     apt-get install -y fish &&\
     mkdir -p /home/dev/.config/fish &&\
     curl -L --create-dirs -o /home/dev/.config/fish/functions/fish_prompt.fish https://raw.githubusercontent.com/danielpclark/fish_prompt/master/fish_prompt.fish &&\
-    echo "set PATH /home/dev/bin $PATH" >> /home/dev/.config/fish/fish.config &&\
+    echo "set PATH /home/dev/bin:$PATH" >> /home/dev/.config/fish/fish.config &&\
 
 # Install a couple of helpful utilities
     apt-get install -y ack-grep &&\
@@ -143,7 +141,8 @@ RUN add-apt-repository ppa:neovim-ppa/unstable &&\
 RUN locale-gen en_US en_US.UTF-8 && dpkg-reconfigure locales &&\
 
     useradd dev -d /home/dev -m -s /usr/bin/fish &&\
-    adduser dev sudo && \
+    adduser dev sudo &&\
+    mkdir -p /etc/container_environment &&\
     echo /home/dev > /etc/container_environment/HOME &&\
     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers &&\
 
@@ -170,21 +169,23 @@ RUN \
     sudo apt-get autoremove -y &&\
     sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# SSH script, ngrok, and startup script
-RUN curl -SL -o /home/dev/bin/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/ssh_key_adder.rb &&\
-    chmod +x /home/dev/bin/ssh_key_adder.rb &&\
-    wget -O /home/dev/ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip &&\
+# ngrok
+RUN wget -O /home/dev/ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip &&\
     unzip -d /home/dev/bin /home/dev/ngrok.zip &&\
     rm /home/dev/ngrok.zip &&\
+
+# SSH script and startup script
+    sudo curl -SL -o /etc/banner https://raw.githubusercontent.com/danielpclark/ruby-pair/master/banner &&\
+    curl -SL -o /home/dev/bin/ssh_key_adder.rb https://raw.githubusercontent.com/danielpclark/ruby-pair/master/ssh_key_adder.rb &&\
+    chmod +x /home/dev/bin/ssh_key_adder.rb &&\
     sudo rm -f /etc/service/sshd/down &&\
-    sudo curl -SL -o /etc/ssh/sshd_config https://raw.githubusercontent.com/danielpclark/ruby-pair/master/sshd_config &&\
-    sudo /etc/my_init.d/00_regen_ssh_host_keys.sh &&\
     echo '#!/bin/bash\n\
+sudo /usr/sbin/sshd\n\
 if [ -z "$1" ]; then\n\
-  exec /usr/bin/sudo /sbin/my_init\n\
+  exec /usr/bin/fish -l\n\
 else \n\
   /home/dev/bin/ngrok authtoken $1\n\
-  exec /usr/bin/sudo /sbin/my_init /home/dev/bin/ngrok tcp 22\n\
+  exec /home/dev/bin/ngrok tcp 22\n\
 fi' > /home/dev/bin/boot.sh &&\
     chmod +x /home/dev/bin/boot.sh &&\
 
@@ -193,7 +194,7 @@ fi' > /home/dev/bin/boot.sh &&\
 
 # Install the Github Auth gem, which will be used to get SSH keys from GitHub
 # to authorize users for SSH
-    RUN /bin/bash -c "source ~/.rvm/scripts/rvm;rvm use $RUBY_VERSION;gem install rake bundler github-auth git-duet seeing_is_believing --no-rdoc --no-ri"
+RUN /bin/bash -c "source ~/.rvm/scripts/rvm;rvm use $RUBY_VERSION;gem install rake bundler github-auth git-duet seeing_is_believing --no-rdoc --no-ri"
 
 # Expose SSH
 EXPOSE 22
