@@ -1,11 +1,11 @@
 FROM ubuntu:18.04
 LABEL Maintainer="Daniel P. Clark <6ftdan@gmail.com>" \
-      Version="1.1.2" \
+      Version="1.1.3" \
       Description="Remote pair programming environment with Ruby, NodeJS, Yarn, Rust, VIM, RVM, neovim, tmux, SSH, and FishShell."
 
 ENV USER root
-ENV RUST_VERSION=1.27.1
-ENV RUBY_VERSION=2.5.1
+ENV RUST_VERSION=1.30.0
+ENV RUBY_VERSION=2.5.3
 ENV VIM_VERSION=v8.1.0005
 ENV RACER_VERSION=2.0.14
 

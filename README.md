@@ -6,9 +6,9 @@ My ideal shell development environment. Originally taken from a pair programming
 * tmux
 * VIM (compiled in container) with plugins (racer, ctags, YouCompleteMe, syntax-highlighting, and more)
 * neovim
-* RVM: Ruby 2.5.1 installed with some basic gems included (rake, bundler, github-auth)
+* RVM: Ruby 2.5.3 installed with some basic gems included (rake, bundler, github-auth)
 * RVM (adjusted for FishShell)
-* Rust version 1.27.1
+* Rust version 1.30.0
 * NodeJS
 * Yarn
 * Fish Shell with custom Github centeric prompt
