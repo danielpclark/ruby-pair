@@ -8,7 +8,7 @@ My ideal shell development environment. Originally taken from a pair programming
 * neovim
 * RVM: Ruby 2.5.3 installed with some basic gems included (rake, bundler, github-auth)
 * RVM (adjusted for FishShell)
-* Rust version 1.30.0
+* Rust version 1.31.0
 * NodeJS
 * Yarn
 * Fish Shell with custom Github centeric prompt
