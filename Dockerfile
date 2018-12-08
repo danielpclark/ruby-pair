@@ -202,6 +202,9 @@ EXPOSE 22
 ENV USER dev
 ENV HOME /home/dev
 
+# Remove sudo privileges
+RUN sudo gpasswd -d dev sudo
+
 # Install the SSH keys of ENV-configured GitHub users before running the SSH
 # server process.
 SHELL ["/usr/bin/fish", "-l", "-c"]
