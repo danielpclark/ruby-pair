@@ -1,13 +1,10 @@
 FROM ubuntu:18.04
 LABEL Maintainer="Daniel P. Clark <6ftdan@gmail.com>" \
-      Version="1.1.3" \
+      Version="1.1.4" \
       Description="Remote pair programming environment with Ruby, NodeJS, Yarn, Rust, VIM, RVM, neovim, tmux, SSH, and FishShell."
 
 ENV USER root
-ENV RUST_VERSION=1.31.0
-ENV RUBY_VERSION=2.5.3
-ENV VIM_VERSION=v8.1.0005
-ENV RACER_VERSION=2.0.14
+ENV NODE_VERSION=10
 
 # Start by changing the apt output, as stolen from Discourse's Dockerfiles.
 RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
@@ -15,14 +12,14 @@ RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
     apt-get update &&\
 # Basic dev tools (Custom VIM build needed for plugins)
     apt-get install -y sudo openssh-client git build-essential \
-        ctags man curl direnv software-properties-common libpq-dev\
+        gnupg2 man curl direnv software-properties-common libpq-dev\
         libncurses5-dev libgnome2-dev libgnomeui-dev wget pkg-config \
         libgtk2.0-dev libatk1.0-dev libbonoboui2-dev libssl-dev \
         libcairo2-dev libx11-dev libxpm-dev libxt-dev python-dev \
         ruby-dev lua5.1 liblua5.1-0-dev libperl-dev nano tzdata \
-        locales cmake ghc-mod &&\
+        locales cmake ghc-mod exuberant-ctags &&\
  # Add repos for Node and Yarn
-    curl -sL https://deb.nodesource.com/setup_9.x | bash - ;\
+    curl -sL https://deb.nodesource.com/setup_$NODE_VERSION.x | bash - ;\
     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - ;\
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list ;\
     apt-get update &&\
@@ -32,6 +29,10 @@ RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
     apt-get autoremove -y &&\
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+ENV VIM_VERSION=v8.1.1700
+ENV RUST_VERSION=1.36.0
+ENV HOME=/home/dev
+
 # Begin VIM build & install
 RUN git clone https://github.com/vim/vim.git &&\
     cd vim &&\
@@ -40,7 +41,7 @@ RUN git clone https://github.com/vim/vim.git &&\
                 --enable-multibyte \
                 --enable-rubyinterp=yes \
                 --enable-pythoninterp=yes \
-                --with-python-config-dir=/usr/lib/python2.7/config \
+                --with-python-config-dir=/usr/lib/python3.7/config \
                 --enable-perlinterp=yes \
                 --enable-luainterp=yes \
                 --enable-gui=gtk2 --enable-cscope --prefix=/usr &&\
@@ -54,19 +55,18 @@ RUN git clone https://github.com/vim/vim.git &&\
     update-alternatives --set vi /usr/bin/vim &&\
 
 # Install Rust
-    curl -sO https://static.rust-lang.org/dist/rust-$RUST_VERSION-x86_64-unknown-linux-gnu.tar.gz &&\
-    tar -xzf rust-$RUST_VERSION-x86_64-unknown-linux-gnu.tar.gz &&\
-    ./rust-$RUST_VERSION-x86_64-unknown-linux-gnu/install.sh --without=rust-docs &&\
-    rm -rf rust-$RUST_VERSION-x86_64-unknown-linux-gnu rust-$RUST_VERSION-x86_64-unknown-linux-gnu.tar.gz &&\
+    mkdir /home/dev &&\
+    curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUST_VERSION &&\
+    . /home/dev/.cargo/env
 
-# Make home directory
-    mkdir /home/dev
+# More recent versions require Rust nightly
+ENV RACER_VERSION=2.0.14
 
 # Install Racer (Rust auto-completion for VIM)
 RUN git clone https://github.com/phildawes/racer.git &&\
     cd racer &&\
     git checkout $RACER_VERSION &&\
-    cargo build --release &&\
+    /home/dev/.cargo/bin/cargo build --release &&\
     mkdir /home/dev/bin &&\
     mv ./target/release/racer /home/dev/bin &&\
     cd .. &&\
@@ -80,7 +80,7 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
     git clone https://github.com/VundleVim/Vundle.vim.git /home/dev/.vim/bundle/Vundle.vim;\
 
 # Install VIM plugins
-    HOME=/home/dev vim +PluginInstall +qall
+    vim +PluginInstall +qall
 
 # YouCompleteMe
 RUN cd /home/dev/.vim/bundle/YouCompleteMe &&\
@@ -152,6 +152,8 @@ RUN locale-gen en_US en_US.UTF-8 && dpkg-reconfigure locales &&\
 
 USER dev
 
+ENV RUBY_VERSION=2.6.3
+
 RUN \
 # Setup neovim
     ln -s /home/dev/.vim /home/dev/.config/nvim ;\
@@ -159,7 +161,7 @@ RUN \
  
 # Install RVM
     sudo apt-get update &&\
-    gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 &&\
+    gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB &&\
     curl -SL https://get.rvm.io | bash -s stable --ruby=$RUBY_VERSION &&\
     curl -L --create-dirs -o /home/dev/.config/fish/functions/rvm.fish https://raw.github.com/lunks/fish-nuggets/master/functions/rvm.fish &&\
     echo "rvm default" >> /home/dev/.config/fish/config.fish &&\
@@ -194,13 +196,23 @@ fi' > /home/dev/bin/boot.sh &&\
 
 # Install the Github Auth gem, which will be used to get SSH keys from GitHub
 # to authorize users for SSH
-RUN /bin/bash -c "source ~/.rvm/scripts/rvm;rvm use $RUBY_VERSION;gem install rake bundler github-auth git-duet seeing_is_believing --no-rdoc --no-ri"
+RUN /bin/bash -c "source ~/.rvm/scripts/rvm;rvm use $RUBY_VERSION;gem install rake bundler github-auth git-duet seeing_is_believing --no-document"
 
 # Expose SSH
 EXPOSE 22
 
 ENV USER dev
-ENV HOME /home/dev
+
+RUN echo "[[ -s \"\$HOME/.cargo/env\" ]] && source \"\$HOME/.cargo/env\" # Load Rust in to PATH" \
+    >> $HOME/.bash_profile &&\
+    echo "export PATH=\"\$HOME/bin:\$PATH\"" \
+    >> $HOME/.bash_profile &&\
+    echo "source $HOME/.bash_profile" >> $HOME/.bashrc
+
+RUN echo ". \"\$HOME/.cargo/env\" # Load Rust in to PATH" \
+    >> $HOME/.config/fish/config.fish &&\
+    echo "set -gx PATH \$HOME/bin \$PATH" \
+    >> $HOME/.config/fish/config.fish
 
 # Remove sudo privileges
 RUN sudo gpasswd -d dev sudo
