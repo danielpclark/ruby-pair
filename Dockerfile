@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 LABEL Maintainer="Daniel P. Clark <6ftdan@gmail.com>" \
-      Version="1.1.4" \
+      Version="1.1.5" \
       Description="Remote pair programming environment with Ruby, NodeJS, Yarn, Rust, VIM, RVM, neovim, tmux, SSH, and FishShell."
 
 ENV USER root
@@ -17,7 +17,7 @@ RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
         libgtk2.0-dev libatk1.0-dev libbonoboui2-dev libssl-dev \
         libcairo2-dev libx11-dev libxpm-dev libxt-dev python-dev \
         ruby-dev lua5.1 liblua5.1-0-dev libperl-dev nano tzdata \
-        locales cmake ghc-mod exuberant-ctags &&\
+        locales cmake exuberant-ctags &&\
  # Add repos for Node and Yarn
     curl -sL https://deb.nodesource.com/setup_$NODE_VERSION.x | bash - ;\
     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - ;\
@@ -80,18 +80,18 @@ RUN curl -sL https://raw.githubusercontent.com/danielpclark/ruby-pair/master/.vi
     git clone https://github.com/VundleVim/Vundle.vim.git /home/dev/.vim/bundle/Vundle.vim;\
 
 # Install VIM plugins
-    vim +PluginInstall +qall
+    vim +PluginInstall +qall &&\
 
 # YouCompleteMe
-RUN cd /home/dev/.vim/bundle/YouCompleteMe &&\
+    cd /home/dev/.vim/bundle/YouCompleteMe &&\
     ./install.py --clang-completer  \
                  --js-completer     \
                  --rust-completer &&\
-    cd /home/dev
+    cd /home/dev &&\
 
 # vimproc
-RUN cd /home/dev/.vim/bundle/vimproc && make &&\
-    cd /home/dev
+    cd /home/dev/.vim/bundle/vimproc && make &&\
+    cd /home/dev &&\
 
 # # Haskell Stack
 # RUN curl -SL -o /home/dev/stack-1.6.5-linux-x86_64.tar.gz \
@@ -101,14 +101,14 @@ RUN cd /home/dev/.vim/bundle/vimproc && make &&\
 #     rm -rf stack-1.6.5-linux-x86_64*
 
 # Manually update DB Ext plugin
-RUN curl -L --create-dirs -o /home/dev/.vim/bundle/dbext.vim/dbext_2500.zip http://www.vim.org/scripts/download_script.php\?src_id=24935 &&\
+    curl -L --create-dirs -o /home/dev/.vim/bundle/dbext.vim/dbext_2500.zip http://www.vim.org/scripts/download_script.php\?src_id=24935 &&\
     cd /home/dev/.vim/bundle/dbext.vim/ &&\
     unzip dbext_2500.zip &&\
     rm dbext_2500.zip &&\
-    cd -
+    cd - &&\
 
 # Set up for pairing with wemux and install neovim
-RUN add-apt-repository ppa:neovim-ppa/unstable &&\
+    add-apt-repository ppa:neovim-ppa/unstable &&\
     apt-get update &&\
     apt-get install -y tmux neovim &&\
     git clone git://github.com/zolrath/wemux.git /usr/local/share/wemux &&\
@@ -207,9 +207,8 @@ RUN echo "[[ -s \"\$HOME/.cargo/env\" ]] && source \"\$HOME/.cargo/env\" # Load 
     >> $HOME/.bash_profile &&\
     echo "export PATH=\"\$HOME/bin:\$PATH\"" \
     >> $HOME/.bash_profile &&\
-    echo "source $HOME/.bash_profile" >> $HOME/.bashrc
-
-RUN echo ". \"\$HOME/.cargo/env\" # Load Rust in to PATH" \
+    echo "source $HOME/.bash_profile" >> $HOME/.bashrc &&\
+    echo ". \"\$HOME/.cargo/env\" # Load Rust in to PATH" \
     >> $HOME/.config/fish/config.fish &&\
     echo "set -gx PATH \$HOME/bin \$PATH" \
     >> $HOME/.config/fish/config.fish
